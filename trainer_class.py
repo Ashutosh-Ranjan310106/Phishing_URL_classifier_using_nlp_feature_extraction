@@ -263,7 +263,8 @@ class Trainer:
                             loss = self.criterion(outputs, batch_y)
 
                             batch_loss = loss.item()
-                            preds = (outputs >= 0.5).float()
+                            probs = torch.sigmoid(outputs)
+                            preds = (probs >= 0.5).float()
                             batch_acc = (preds == batch_y).float().mean().item()
 
                             train_loss += batch_loss * batch_x.size(0)
@@ -356,7 +357,8 @@ class Trainer:
                 loss = self.criterion(outputs, batch_y)
                 avg_batch_loss = loss.item()
                 val_loss += avg_batch_loss * batch_x.size(0)
-                preds = (outputs >= 0.5).float()
+                probs = torch.sigmoid(outputs)
+                preds = (probs >= 0.5).float()
                 correct_val += (preds == batch_y).sum().item()
                 total_val += batch_x.size(0)
         avg_val_loss = val_loss / total_val
