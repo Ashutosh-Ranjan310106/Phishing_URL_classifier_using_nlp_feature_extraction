@@ -74,6 +74,9 @@ def filter_and_encode(df, name):
     return df
 
 df1 = filter_and_encode(df1, "Dataset 1 (Malicious URLs)")
+df2['label'][df2['label'] == 1] = 2
+df2['label'][df2['label'] == 0] = 1
+df2['label'][df2['label'] == 2] = 0
 
 def drop_dublicates(df):
     df = df.dropna(subset=["url", "label"])
