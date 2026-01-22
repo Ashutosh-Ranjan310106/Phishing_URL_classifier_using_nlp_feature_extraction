@@ -1,3 +1,10 @@
+
+## 👥 Team Members
+- **Ashutosh Ranjan**  
+- **Nikhil Chaudhary**  
+- **Pankaj Kumar**  
+- **Nikhil Kumar**  
+- **Sapavath Hanumanth**
 # Phishing & Malicious URL Detection using Deep Learning
 
 ## 📌 Project Overview
