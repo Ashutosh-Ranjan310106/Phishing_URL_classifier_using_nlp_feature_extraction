@@ -1,7 +1,7 @@
 import copy
 import torch
 import torch.nn as nn
-from model import *
+from model_pipeline import *
 import numpy as np
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
@@ -15,7 +15,7 @@ def make_tensor_dataset(df):
     url_tensor = torch.stack(list(df["encode"]))
     labels_tensor = torch.tensor(df["label"].astype(np.float32).values, dtype=torch.long)
     return TensorDataset(url_tensor, labels_tensor)
-def make_clients(global_model, train_dataset,val_dataset, dataset_name, num_clients=5, alpha=0.5, total_data=1, batch_size=256, max_train_samples_per_client=50000, max_val_samples_per_client=8000):
+def make_clients(global_model, train_dataset,val_dataset, dataset_name,client_model, num_clients=5, alpha=0.5, total_data=1, batch_size=256, max_train_samples_per_client=50000, max_val_samples_per_client=8000):
     import numpy as np
     # using alpha to produce unidentical splits high alpha more identical
     client_fractions = np.random.dirichlet([alpha] * num_clients) * total_data
@@ -40,7 +40,7 @@ def make_clients(global_model, train_dataset,val_dataset, dataset_name, num_clie
         train_start = train_end
         val_start   = val_end
 
-        client_model = URLBinaryCNN_bestmodel(vocab_size=97, maxlen=128).to(device)                     # fresh instance
+        client_model = client_model(vocab_size=97, maxlen=128).to(device)                     # fresh instance
         client_model.shared_layer.load_state_dict(global_model.shared_layer.state_dict())
         train_set = make_tensor_dataset(train_slice)
         val_set   = make_tensor_dataset(val_slice)
@@ -63,7 +63,7 @@ def quick_fine_tune(model, train_loader, personal_optimizer,frac=1, epochs=1):
         save=0
     )
 
-    trainer.train(epochs_list=[0,0,epochs], frac=frac, log=0)
+    trainer.train(epochs_list=[0,0,epochs], frac=frac, log=0, skip_phase=0)
 
 
 def train_client(client_devices, epoch=1):
@@ -174,10 +174,8 @@ def update_clients(client_devices, global_model, alpha=0.3, quick_tune_epoch = 3
     #client_std = sum([(client_device['val_acc']-client_acc_avg)**2 for client_device in client_devices])/len(client_devices)**(1/2)
     for i, client_device in enumerate(client_devices):
         client_device['model'].shared_layer.load_state_dict(global_model.shared_layer.state_dict())
-        soft_update(client=client_device['model'], global_model=global_model, alpha=alpha)
-
-        personal_optimizer = torch.optim.NAdam(client_device['model'].personal_layer.parameters(), lr=0.001, weight_decay=0.0001)
-        #client.personal_layer.load_state_dict(global_model.shared_layer.state_dict())
+        #soft_update(client=client_device['model'], global_model=global_model, alpha=alpha)
+        personal_optimizer = torch.optim.AdamW(client_device['model'].personal_layer.parameters(), lr=0.001, weight_decay=0.0001)
         quick_fine_tune(client_device['model'], client_device['train_loader'], personal_optimizer,epochs=quick_tune_epoch)
         pass
 def evaluate_client(client_devices):

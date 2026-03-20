@@ -48,7 +48,13 @@ class Trainer:
         self.best_val_loss = float('inf')
         self.best_train_loss = float('inf')
         self.criterion = criterion
-        
+
+        self.global_reference = None
+        self.mu = 0.0
+
+        self.global_c = None
+        self.client_c = None
+
         self.global_params = []
         self.persnalization_params = []
         for name, param in model.shared_layer.named_parameters():
@@ -87,7 +93,12 @@ class Trainer:
 
             with open(os.path.join(self.run_folder,"model_fx_graph.txt"), "w") as f:
                 f.write(str(gm.graph))
-
+    def set_fedprox(self, global_model, mu=0.01):
+        self.global_reference = {
+            name: param.detach().clone()
+            for name, param in global_model.named_parameters()
+        }
+        self.mu = mu
     def trace_model_fx(self, model, example_input):
         """
         Safely trace a PyTorch model using FX
@@ -221,7 +232,19 @@ class Trainer:
 
                     outputs = self.model(batch_x)
                     loss = self.criterion(outputs, batch_y)
+
+                    # FedProx regularization
+                    if self.global_reference is not None:
+                        prox = 0
+                        for name, param in self.model.named_parameters():
+                            prox += torch.sum((param - self.global_reference[name].to(param.device))**2)
+
+                        loss += (self.mu / 2) * prox
+
                     loss.backward()
+                    if self.global_c is not None and self.client_c is not None:
+                        for param, c, ci in zip(self.model.parameters(), self.global_c, self.client_c):
+                            param.grad += - ci + c
 
                     for opt in active_optims:
                         opt.step()
@@ -304,13 +327,13 @@ class Trainer:
                     if avg_val_loss < self.best_val_loss:
                         self.best_val_loss = avg_val_loss
 
-                        # 1️⃣ Save best model
+                        # Save best model
                         save_file(
                             self.model.state_dict(),
                             os.path.join(self.run_folder, "best_loss_model.safetensors")
                         )
 
-                        # 2️⃣ Store weight distributions for this epoch
+                        # Store weight distributions for this epoch
                         layer_weights = extract_layer_weights(self.model)
                         for layer_name, w in layer_weights.items():
                             self.weight_history.setdefault(layer_name, {})

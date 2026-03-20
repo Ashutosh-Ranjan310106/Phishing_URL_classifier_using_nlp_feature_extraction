@@ -140,9 +140,9 @@ def lazy_dataframe(*datasets):
 
 
 
-all_dataset = lazy_dataframe(split_dataset(df1, "Dataset 1 (Malicious URLs)"), split_dataset(df2, "Dataset 2 (ndarvind/phiusiil-phishing)"), split_dataset(df3, "Dataset 3 (kmack/Phishing_urls)"), split_dataset(df4, "Dataset 4 (kaggels/taruntiwarihp/phishing-site-urls)"))#, split_dataset(df5, "Dataset 5 (grambeddings)") )
+all_dataset = lazy_dataframe(split_dataset(df1, "Malicious URLs [D1]"), split_dataset(df3, "kmack Phishing urls [D3]"), split_dataset(df4, "kaggels phishing site urls [D4]"))#, split_dataset(df5, "Dataset 5 (grambeddings)") )
 
-
+# split_dataset(df2, "UCI phiusiil-phishing [D2]")
 del df1, df2, df3, df4, #df5
 del df3_test, df3_train, df3_valid
 #del df5_test, df5_train
@@ -159,5 +159,5 @@ if __name__ == "__main__":
     summarize_dataset(*next(gen))
     summarize_dataset(*next(gen))
     summarize_dataset(*next(gen))
-    #summarize_dataset(*next(gen))
+    summarize_dataset(*next(gen))
 

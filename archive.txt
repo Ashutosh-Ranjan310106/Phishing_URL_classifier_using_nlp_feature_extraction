@@ -1,0 +1,18 @@
+=====================================================================================================================================
+sequecial learning 
+    else:
+            for j in range(client_epoch):
+                order = list(range(len(client_devices)))
+                random.shuffle(order)
+                print("sequencial training on", end=' ')
+                for idx in order:
+                    print(f"{client_devices[idx]['dataset']}", end='')
+                    with torch.no_grad():
+                        client_devices[idx]['model'].shared_layer.load_state_dict(global_model.shared_layer.state_dict())
+                    
+                    losses = train_client_cyclic(client_devices[idx])
+
+                    fed_learning_cyclic(global_model, client_device=client_devices[idx], alpha=0.2)
+                print()
+                quick_fine_tune(global_model,train_loader,g_personal_optimizer,  0.1, epochs=1)
+=====================================================================================================================================

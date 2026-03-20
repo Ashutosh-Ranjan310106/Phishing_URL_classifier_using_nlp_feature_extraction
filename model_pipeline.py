@@ -206,10 +206,7 @@ class URLBinaryCNN_bestmodel(nn.Module):
             #"maxpool": nn.MaxPool1d(2),
             #"avg_pool1": nn.AvgPool1d(kernel_size=2),
             "attentionpooling": DualAttentionPooling(128),
-            "fc1": nn.Linear(128 , 64),
-            "layer_normalization1": nn.LayerNorm(64),
-            "gelu2": nn.GELU(),
-            "dropout1": nn.Dropout(0.25),
+
 
             
             
@@ -218,7 +215,10 @@ class URLBinaryCNN_bestmodel(nn.Module):
 
         # Personalization Layer (Local)
         self.personal_layer = nn.ModuleDict({
-            
+            "fc1": nn.Linear(128 , 64),
+            "layer_normalization1": nn.LayerNorm(64),
+            "gelu2": nn.GELU(),
+            "dropout1": nn.Dropout(0.25),
             "fc2": nn.Linear(64, 48),
             "gelu3": nn.GELU(),
             #"dropout2": nn.Dropout(0.25),
@@ -250,7 +250,7 @@ class URLBinaryCNN_bestmodel(nn.Module):
         #x = x[:, -1, :]
         #x = x.flatten(1)
         x = self.shared_layer["attentionpooling"](x)
-        x = self.shared_layer["dropout1"](self.shared_layer["gelu2"](self.shared_layer["layer_normalization1"](self.shared_layer["fc1"](x))))
+        x = self.personal_layer["dropout1"](self.personal_layer["gelu2"](self.personal_layer["layer_normalization1"](self.personal_layer["fc1"](x))))
         # Personalization head
         x = self.personal_layer["gelu3"](self.personal_layer["fc2"](x)) #self.personal_layer["dropout2"](
         x = self.personal_layer["head"](x)
