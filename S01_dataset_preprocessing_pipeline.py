@@ -140,7 +140,7 @@ def lazy_dataframe(*datasets):
 
 
 
-all_dataset = lazy_dataframe(split_dataset(df1, "Malicious URLs [D1]"), split_dataset(df3, "kmack Phishing urls [D3]"), split_dataset(df4, "kaggels phishing site urls [D4]"))#, split_dataset(df5, "Dataset 5 (grambeddings)") )
+all_dataset = lazy_dataframe(split_dataset(df1, "Malicious URLs [D1]"), split_dataset(df2, "UCI phiusiil-phishing [D2]"), split_dataset(df3, "kmack Phishing urls [D3]"), split_dataset(df4, "kaggels phishing site urls [D4]"))#, split_dataset(df5, "Dataset 5 (grambeddings)") )
 
 # split_dataset(df2, "UCI phiusiil-phishing [D2]")
 del df1, df2, df3, df4, #df5

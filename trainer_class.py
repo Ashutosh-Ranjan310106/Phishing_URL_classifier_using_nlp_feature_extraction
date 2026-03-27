@@ -232,7 +232,6 @@ class Trainer:
 
                     outputs = self.model(batch_x)
                     loss = self.criterion(outputs, batch_y)
-
                     # FedProx regularization
                     if self.global_reference is not None:
                         prox = 0
@@ -240,12 +239,12 @@ class Trainer:
                             prox += torch.sum((param - self.global_reference[name].to(param.device))**2)
 
                         loss += (self.mu / 2) * prox
-
                     loss.backward()
+                    '''
                     if self.global_c is not None and self.client_c is not None:
                         for param, c, ci in zip(self.model.parameters(), self.global_c, self.client_c):
                             param.grad += - ci + c
-
+                    '''
                     for opt in active_optims:
                         opt.step()
 
